@@ -3,7 +3,7 @@ process.env.NODE_ENV = 'test';
 
 const request = require("supertest");
 
-const db = require("../db");
+const db = require("../db.js");
 const app = require("../app");
 
 const {
@@ -141,16 +141,16 @@ describe("GET /companies", function () {
     expect(response.statusCode).toBe(400);
   });
 
-  // test("fails: test next() handler", async function () {
+  test("fails: test next() handler", async function () {
   //   // there's no normal failure event which will cause this route to fail ---
   //   // thus making it hard to test that the error-handler works with it. This
   //   // should cause an error, all right :)
-  //   await db.query("DROP TABLE companies CASCADE");
-  //   const resp = await request(app)
-  //       .get("/companies")
-  //       .set("authorization", `Bearer ${u1Token}`);
-  //   expect(resp.statusCode).toEqual(500);
-  // });
+    await db.query("DROP TABLE companies CASCADE");
+    const resp = await request(app)
+        .get("/companies")
+        .set("authorization", `Bearer ${adminToken}`);
+    expect(resp.statusCode).toEqual(500);
+  });
 });
 
 /************************************** GET /companies/:handle */
