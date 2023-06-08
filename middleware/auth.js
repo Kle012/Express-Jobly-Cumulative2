@@ -56,9 +56,24 @@ function ensureAdmin (req, res, next) {
   }
 }
 
+// Middleware to use when they must provide a valid token &  be user matching username provided as route param.
+
+// If not, raises Unauthorized.
+
+function ensureAdminOrUser(req, res, next) {
+  try {
+    const user = res.locals.user;
+    if (!(user && (user.isAdmin || user.username === req.params.username))) throw new UnauthorizedError();
+    return next();
+  } catch (error) {
+    return next(error);
+  }
+}
+
 
 module.exports = {
   authenticateJWT,
   ensureLoggedIn,
-  ensureAdmin
+  ensureAdmin,
+  ensureAdminOrUser
 };
