@@ -1,5 +1,6 @@
 "use strict";
 
+const { query } = require("express");
 const db = require("../db");
 const { BadRequestError, NotFoundError } = require("../expressError");
 const { sqlForPartialUpdate } = require("../helpers/sql");
@@ -44,20 +45,59 @@ class Company {
     return company;
   }
 
-  /** Find all companies.
+  /** Find all companies. (optinal filter on searchFilters).
+   * 
+   * searchFilters (all optional):
+   * - minEmployees
+   * - maxEmployees
+   * - name (will find case-sensitive, partial matches)
    *
    * Returns [{ handle, name, description, numEmployees, logoUrl }, ...]
    * */
 
-  static async findAll() {
-    const companiesRes = await db.query(
-          `SELECT handle,
+  static async findAll(searchFilters = {}) {
+    let query = `SELECT handle,
                   name,
                   description,
                   num_employees AS "numEmployees",
                   logo_url AS "logoUrl"
-           FROM companies
-           ORDER BY name`);
+                FROM companies`;
+
+    let whereExpressions = [];
+    let queryValues = [];
+    
+    const { name, minEmployees, maxEmployees } = searchFilters;
+
+    if (minEmployees > maxEmployees) {
+      throw new BadRequestError("Min employees cannot be greater than max employees.");
+    }
+
+    // For each possible search term, add to whereExpressions and queryValues so we can generate the right SQL
+
+    if (minEmployees !== undefined) {
+      queryValues.push(minEmployees);
+      whereExpressions.push(`num_employees >= $${queryValues.length}`);
+    }
+
+    if (maxEmployees !== undefined) {
+      queryValues.push(maxEmployees);
+      whereExpressions.push(`num_employees <= $${queryValues.length}`);
+    }
+
+    if (name) {
+      queryValues.push(`%${name}%`);
+      whereExpressions.push(`name ILIKE $${queryValues.length}`);
+    }
+
+    if (whereExpressions.length > 0) {
+      query += " WHERE " + whereExpressions.join(" AND ");
+    }
+    
+    // Finalized query and return results
+    query += " ORDER BY name";
+
+    const companiesRes = await db.query(query, queryValues);
+
     return companiesRes.rows;
   }
 
