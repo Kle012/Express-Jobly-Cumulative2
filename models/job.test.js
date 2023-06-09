@@ -11,7 +11,6 @@ const {
   commonAfterAll,
   jobIdTest
 } = require("./_testCommon");
-const Company = require("./company.js");
 
 beforeAll(commonBeforeAll);
 beforeEach(commonBeforeEach);
@@ -78,7 +77,7 @@ describe('findAll', () => {
     });
 
     test('works: by min salary', async () => {
-        let jobs = await Company.findAll({ minSalary: 250});
+        let jobs = await Job.findAll({ minSalary: 250});
         expect(jobs).toEqual([
             {
                 id: jobIdTest[2],
@@ -92,7 +91,7 @@ describe('findAll', () => {
     });
 
     test('works: by equity', async () => {
-        let jobs = await Company.findAll({ equity: true});
+        let jobs = await Job.findAll({ hasEquity: true});
         expect(jobs).toEqual([
             {
                 id: jobIdTest[0],
@@ -114,7 +113,7 @@ describe('findAll', () => {
     });
 
     test('works: by min salary and equity', async () => {
-        let jobs = await Job.findAll({ minSalary: 200, equity: true });
+        let jobs = await Job.findAll({ minSalary: 200, hasEquity: true });
         expect(jobs).toEqual([
             {
                 id: jobIdTest[1],
@@ -147,31 +146,29 @@ describe('findAll', () => {
 describe('get', () => {
     test('works', async () => {
         let job = await Job.get(jobIdTest[0]);
-        expect(job).toEqual([
-            {
-                id: jobIdTest[0],
-                title: "Job1",
-                salary: 100,
-                equity: "0.1",
-                companyHandle: "c1",
-                companyName: "C1",
-                company: {
-                    handle: "c1",
-                    name: "C1",
-                    description: "Desc1",
-                    numEmployees: 1,
-                    logoUrl: "http://c1.img"
-                }
+        expect(job).toEqual({
+            id: jobIdTest[0],
+            title: "Job1",
+            salary: 100,
+            equity: "0.1",
+            companyHandle: "c1",
+            companyName: "C1",
+            company: {
+                handle: "c1",
+                name: "C1",
+                description: "Desc1",
+                numEmployees: 1,
+                logoUrl: "http://c1.img"
             }
-        ]);
+        });
     });
 
     test('not found if no such job', async () => {
         try {
             await Job.get(0);
             fail();
-        } catch (error) {
-            expect(error instanceof NotFoundError).toBeTruthy();
+        } catch (err) {
+            expect(err instanceof NotFoundError).toBeTruthy();
         }
     });
 });
@@ -219,7 +216,7 @@ describe('update', () => {
 
 describe('remove', () => {
     test('works', async () => {
-        await Company.remove(jobIdTest[0]);
+        await Job.remove(jobIdTest[0]);
         const res = await db.query(`SELECT id FROM jobs WHERE id = $1`, [jobIdTest[0]]);
 
         expect(res.rows.length).toEqual(0);
@@ -227,10 +224,10 @@ describe('remove', () => {
 
     test('No found if no such job', async () => {
         try {
-            await Job.remove(0);
+            await Job.remove(999);
             fail();
         } catch (err) {
-            expect(err instanceof BadRequestError).toBeTruthy();
+            expect(err instanceof NotFoundError).toBeTruthy();
         }
     });
 });
