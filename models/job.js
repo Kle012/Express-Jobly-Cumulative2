@@ -149,8 +149,7 @@ class Job {
         const querySql = `UPDATE jobs 
                       SET ${setCols} 
                       WHERE id = ${idVarIdx} 
-                      RETURNING id, 
-                                name, 
+                      RETURNING id,  
                                 title,
                                 salary,
                                 equity, 
@@ -173,7 +172,7 @@ class Job {
   static async remove(id) {
     const result = await db.query(
           `DELETE
-           FROM job
+           FROM jobs
            WHERE id = $1
            RETURNING id`,
         [id]);
