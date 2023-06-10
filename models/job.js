@@ -109,7 +109,7 @@ class Job {
 
         let job = jobRes.rows[0];
 
-        if (!job) throw new NotFoundError(`No job: ${title}`);
+        if (!job) throw new NotFoundError(`No job: ${id}`);
 
         const compRes = await db.query(
             `SELECT handle,
@@ -140,9 +140,7 @@ class Job {
      * */
 
     static async update(id, data) {
-        const { setCols, values } = sqlForPartialUpdate(
-            data,
-            {});
+        const { setCols, values } = sqlForPartialUpdate(data, {});
         
         const idVarIdx = "$" + (values.length + 1);
         
