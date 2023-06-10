@@ -132,8 +132,12 @@ class Company {
         WHERE company_handle = $1
         ORDER BY id,`
         [handle]);
-
-    company.jobs = jobRes.rows;
+    
+    if (jobRes) {
+      company.jobs = jobRes.rows;
+    } else {
+      company.jobs = []; 
+    }
 
     return company;
   }
