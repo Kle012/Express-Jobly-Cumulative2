@@ -151,8 +151,6 @@ describe('get', () => {
             title: "Job1",
             salary: 100,
             equity: "0.1",
-            companyHandle: "c1",
-            companyName: "C1",
             company: {
                 handle: "c1",
                 name: "C1",
@@ -204,7 +202,7 @@ describe('update', () => {
 
     test("bad request with no data", async () => {
         try {
-          await Job.update(testJobIds[0], {});
+          await Job.update(jobIdTest[0], {});
           fail();
         } catch (err) {
           expect(err instanceof BadRequestError).toBeTruthy();
