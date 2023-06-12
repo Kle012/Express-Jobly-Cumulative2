@@ -14,7 +14,6 @@ const userUpdateSchema = require("../schemas/userUpdate.json");
 
 const router = express.Router();
 
-
 /** POST / { user }  => { user, token }
  *
  * Adds a new user. This is not the registration endpoint --- instead, this is
@@ -31,7 +30,7 @@ router.post("/", ensureAdmin, async function (req, res, next) {
   try {
     const validator = jsonschema.validate(req.body, userNewSchema);
     if (!validator.valid) {
-      const errs = validator.errors.map(e => e.stack);
+      const errs = validator.errors.map((e) => e.stack);
       throw new BadRequestError(errs);
     }
 
@@ -42,7 +41,6 @@ router.post("/", ensureAdmin, async function (req, res, next) {
     return next(err);
   }
 });
-
 
 /** GET / => { users: [ {username, firstName, lastName, email }, ... ] }
  *
@@ -60,7 +58,6 @@ router.get("/", ensureAdmin, async function (req, res, next) {
   }
 });
 
-
 /** GET /[username] => { user }
  *
  * Returns { username, firstName, lastName, isAdmin }
@@ -77,7 +74,6 @@ router.get("/:username", ensureAdminOrUser, async function (req, res, next) {
   }
 });
 
-
 /** PATCH /[username] { user } => { user }
  *
  * Data can include:
@@ -92,7 +88,7 @@ router.patch("/:username", ensureAdminOrUser, async function (req, res, next) {
   try {
     const validator = jsonschema.validate(req.body, userUpdateSchema);
     if (!validator.valid) {
-      const errs = validator.errors.map(e => e.stack);
+      const errs = validator.errors.map((e) => e.stack);
       throw new BadRequestError(errs);
     }
 
@@ -102,7 +98,6 @@ router.patch("/:username", ensureAdminOrUser, async function (req, res, next) {
     return next(err);
   }
 });
-
 
 /** DELETE /[username]  =>  { deleted: username }
  *
@@ -118,5 +113,26 @@ router.delete("/:username", ensureAdminOrUser, async function (req, res, next) {
   }
 });
 
+/** POST /[username]/jobs/[id] { srate } => {application }
+ *
+ * Returns {"applied": jobId}
+ *
+ * Authorization required: same user as :username or admin
+ *
+ */
+
+router.post(
+  "/:username/jobs/:id",
+  ensureAdminOrUser,
+  async (req, res, next) => {
+    try {
+      const jobId = +req.params.id;
+      await User.apply(req.params.username, jobId);
+      return res.json({ applied: jobId });
+    } catch (error) {
+      return next(error);
+    }
+  }
+);
 
 module.exports = router;
