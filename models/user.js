@@ -221,7 +221,7 @@ class User {
     let res1 = await db.query(
       `SELECT id
       FROM jobs
-      WHERE job_id = $1`,
+      WHERE id = $1`,
       [jobId]
     );
 
