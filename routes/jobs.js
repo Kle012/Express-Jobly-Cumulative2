@@ -105,7 +105,7 @@ router.get("/:id", async (req, res, next) => {
 
 router.patch("/:id", ensureAdmin, async (req, res, next) => {
     try {
-        const result = jsonschema.validate(q, jobUpdateSchema);
+        const result = jsonschema.validate(req.body, jobUpdateSchema);
         if (!result.valid){
             let listErrors = result.errors.map(error => error.stack);
             throw new BadRequestError(listErrors);
@@ -127,7 +127,7 @@ router.patch("/:id", ensureAdmin, async (req, res, next) => {
 router.delete("/:id", ensureAdmin, async (req, res, next) => {
     try {
         await Job.remove(req.params.id);
-        return res.json({ deleted: req.params.id });
+        return res.json({ msg: "deleted" });
     } catch (err) {
         return next(err);
     }
